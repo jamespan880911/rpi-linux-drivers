@@ -1,0 +1,33 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+	//修改系統原本的GPIO controller設定
+        target = <&gpio>;
+        __overlay__ {
+            my_led_pin: my_led_pin_0 {
+                brcm,pins = <26>; // 指定實體腳位：GPIO 26
+                brcm,function = <1>; // 指定功能：1 代表 Output
+                brcm,pull = <0>;     // 設定電阻：0 代表 No Pull
+            };
+        };
+    };
+
+    //建立邏輯裝置（跟Driver配對）
+    fragment@1 {
+	// 掛在系統最上層
+        target-path = "/";
+        __overlay__ {
+            my_led_device {	//裝置節點名稱
+                compatible = "my-gpio-led"; // 和driver的配對暗號
+                pinctrl-names = "default";
+                pinctrl-0 = <&my_led_pin>; // 連結 Fragment 0（pinctrl 套用 my_led_pin 設定）
+                led-gpios = <&gpio 26 0>;   // 定義給driver用的資源（devm_gpiod_get(..., "led", ...)）
+                status = "okay";
+            };
+        };
+    };
+};

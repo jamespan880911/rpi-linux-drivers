@@ -1,0 +1,14 @@
+*.o
+*.ko
+*.mod.c
+*.mod
+*.order
+*.symvers
+.*.cmd
+.tmp_versions/
+
+*.swp
+*~
+
+app_test
+hello_world/
