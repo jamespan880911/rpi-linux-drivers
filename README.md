@@ -17,7 +17,5 @@
 
 | Module | Description | Key Concepts |
 | :--- | :--- | :--- |
-| **[gpio_led_driver](./gpio_led_driver)** | 平台驅動 GPIO 控制 | `platform_driver`, `device_tree_overlay`, `devm_gpiod`, `sysfs`, `cdev` |
-| *button_irq (Planning)* | 中斷處理驅動 | Interrupt Handling (`request_irq`), Top/Bottom Half, Workqueue |
-| *i2c_sensor (Planning)* | I2C 感測器驅動 | I2C Subsystem, `regmap`, Industrial I/O (IIO) |
-
+| **[gpio_led_driver](./gpio_led_driver)** | 平台驅動 GPIO 控制 | `platform_driver`, `device_tree` |
+| **[i2c_ssd1306_driver](./i2c_ssd1306_driver)** | I2C OLED 顯示驅動 | `i2c_client`, `cdev`, `Burst Write`, User-Space Tools |
