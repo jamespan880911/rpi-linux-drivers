@@ -56,7 +56,7 @@ static int ssd1306_init_display(struct i2c_client *client) {
     ssd1306_write_cmd(client, 0xA4); // 恢復顯存內容顯示
     ssd1306_write_cmd(client, 0xA6); // 正常顯示 (非反相)
 
-    /* 2. 在點亮前先「大清場」：確保載入驅動後螢幕是全黑的 */
+    /* 2. 確保載入驅動後螢幕是全黑的 */
     // 先把座標指針歸零
     ssd1306_write_cmd(client, 0x21); ssd1306_write_cmd(client, 0x00); ssd1306_write_cmd(client, 127);
     ssd1306_write_cmd(client, 0x22); ssd1306_write_cmd(client, 0x00); ssd1306_write_cmd(client, 7);
