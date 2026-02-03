@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <unistd.h> 	// 提供system call
 #include <stdint.h>
 #include <string.h>
 
-// 定義 8x8 字體庫 (ASCII Mapping)
+// 定義字體庫 (ASCII Mapping)
 static const uint8_t font_8x8[][8] = {
     [' '] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
     ['.'] = {0x00, 0x60, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -21,6 +21,9 @@ static const uint8_t font_8x8[][8] = {
     ['8'] = {0x36, 0x49, 0x49, 0x49, 0x36, 0x00, 0x00, 0x00},
     ['9'] = {0x06, 0x49, 0x49, 0x29, 0x1E, 0x00, 0x00, 0x00},
     ['C'] = {0x3E, 0x41, 0x41, 0x41, 0x22, 0x00, 0x00, 0x00},
+    ['E'] = {0x7F, 0x49, 0x49, 0x49, 0x41, 0x00, 0x00, 0x00},
+    ['M'] = {0x7F, 0x02, 0x04, 0x02, 0x7F, 0x00, 0x00, 0x00},
+    ['P'] = {0x7F, 0x09, 0x09, 0x09, 0x06, 0x00, 0x00, 0x00},
     ['N'] = {0x7F, 0x02, 0x04, 0x08, 0x10, 0x20, 0x7F, 0x00},
     ['S'] = {0x46, 0x49, 0x49, 0x49, 0x31, 0x00, 0x00, 0x00},
     ['T'] = {0x01, 0x01, 0x7F, 0x01, 0x01, 0x00, 0x00, 0x00},
@@ -29,34 +32,48 @@ static const uint8_t font_8x8[][8] = {
 
 int main(int argc, char *argv[]) {
     int fd;
-    uint8_t screen_buf[1024] = {0}; // 128x64 顯存緩衝區
+    uint8_t screen_buf[1024] = {0}; // 準備空白畫布（128 * 64 像素 = 1024 Bytes） 
     char *text = "READY";           // 預設顯示文字
     int x_offset = 10;              // 起始橫向偏移量
-
+    
+    // 有外部傳入文字（使用者給參數（argv[1]）），就用
     if (argc > 1) {
+	// 傳字串指標
         text = argv[1];
     }
-
+	
+    // < 14 （防止buffer Overflow）。（（128 - 10 ）/ 8 = 14.75）
     for (int i = 0; i < strlen(text) && i < 14; i++) {
+	// 轉 0 ~ 255，防止font_8x8[c] Segmentation fault   
         unsigned char c = (unsigned char)text[i];
-        
+
+        // 確保字元在 ASCII 範圍內，不會造成陣列越界
         if (c < 128) {
+	    // 把 font_8x8[c] 的 8 個 Bytes，複製到 screen_buf 的對應位置
+            // x_offset + (i * 8) 算出了每個字元在畫布上的橫向座標
             memcpy(&screen_buf[x_offset + (i * 8)], font_8x8[c], 8);
         }
     }
-
+    
+    // 打開驅動節點（Open ReaD WRite 權限）
     fd = open("/dev/ssd1306", O_RDWR);
     if (fd < 0) {
+	// Print Error ，opem or write 失敗會存在 global varible errno 裡
         perror("Open SSD1306 failed");
         return -1;
     }
-
+    
+    // system call ，write()觸發軟體中斷，切到 Kernal Mode，
+    // Linux kernal 根據 fd 去找之前 open 的驅動（/dev/ssd1306）
+    // kernal 去call驅動中的 .write funtion (ssd1306_write)
+    // 從 screen_buf 搬移 1024 Bytes 進去 fd 的 .write 函式
     if (write(fd, screen_buf, 1024) < 0) {
         perror("Write failed");
     } else {
         printf("OLED Displayed: %s\n", text);
     }
 
+    //關閉連線
     close(fd);
     return 0;
 }

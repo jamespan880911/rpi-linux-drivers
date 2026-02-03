@@ -32,7 +32,7 @@ int main() {
         return -1;
     }
 
-    printf("成功！請查看 OLED 螢幕是否出現黑白相間的條紋。\n");
+    printf("成功！\n");
 
     close(fd);
     return 0;

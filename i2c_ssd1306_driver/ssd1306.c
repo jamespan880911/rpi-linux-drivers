@@ -10,7 +10,7 @@
 #define DEVICE_NAME "ssd1306"
 #define CLASS_NAME  "ssd_class"
 
-/* 裝置結構體：封裝所有硬體與軟體資源，方便在函式間傳遞 */
+// 封裝各別device的資訊（OOP）
 struct ssd1306_data {
     struct i2c_client *client;
     struct cdev cdev;
